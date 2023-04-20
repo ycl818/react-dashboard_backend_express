@@ -1,4 +1,4 @@
-import data from "./20230412_151418_DashboardConfig.json" assert { type: "json" };
+import data from "./20230414_144609_DashboardConfig.json" assert { type: "json" };
 import cors from "cors";
 import express from "express";
 // console.log(data);
@@ -119,8 +119,102 @@ app.get("/test/fake_data2", (req, res) => {
   res.json(data2);
 });
 
+app.get("/test/fake_data/Test2", (req, res) => {
+  res.json(data1);
+});
+
+app.get("/test/fake_data/Test", (req, res) => {
+  res.json(data2);
+});
+
+app.get("/test/fake_data/Test/A12", (req, res) => {
+  res.json(data1);
+});
+
+app.get("/test/fake_data/A12", (req, res) => {
+  res.json(data1);
+});
+
+app.get("/test/fake_data/Test/A125", (req, res) => {
+  res.json(data2);
+});
+
+app.get("/test/Test/fake_data/", (req, res) => {
+  res.json(data1);
+});
+
 app.get("/test/widget_data", (req, res) => {
   res.json(data);
+});
+
+// route for SSE updates
+app.get("/updates", (req, res) => {
+  // set headers for SSE
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("Connection", "keep-alive");
+
+  // send initial message
+  res.write(
+    "data: " +
+      JSON.stringify({
+        timestamp: Date.now(),
+        value: Math.floor(Math.random() * 111).toFixed(1) + 785,
+      }) +
+      "\n\n"
+  );
+
+  // send updates every 1 second
+  const interval = setInterval(() => {
+    res.write(
+      "data: " +
+        JSON.stringify({
+          timestamp: Date.now(),
+          value: Math.floor(Math.random() * 111) + 785,
+        }) +
+        "\n\n"
+    );
+  }, 5000);
+
+  // clean up on disconnect
+  req.on("close", () => {
+    clearInterval(interval);
+  });
+});
+
+// route for SSE updates
+app.get("/updates/v2", (req, res) => {
+  // set headers for SSE
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("Connection", "keep-alive");
+
+  // send initial message
+  res.write(
+    "data: " +
+      JSON.stringify({
+        timestamp: Date.now(),
+        value: Math.floor(Math.random() * 111).toFixed(1) + 25,
+      }) +
+      "\n\n"
+  );
+
+  // send updates every 1 second
+  const interval = setInterval(() => {
+    res.write(
+      "data: " +
+        JSON.stringify({
+          timestamp: Date.now(),
+          value: Math.floor(Math.random() * 111) + 25,
+        }) +
+        "\n\n"
+    );
+  }, 5000);
+
+  // clean up on disconnect
+  req.on("close", () => {
+    clearInterval(interval);
+  });
 });
 
 app.listen(5001, () => console.log("Server running on port 5001"));
